@@ -187,10 +187,10 @@ function Albums() {
 
   if (loading) {
     return (
-      <div className=\"min-h-screen bg-gray-50 flex items-center justify-center\">
-        <div className=\"text-center\">
-          <Loader2 className=\"h-8 w-8 animate-spin text-blue-600 mx-auto mb-4\" />
-          <p className=\"text-gray-600\">Loading your photo albums...</p>
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <Loader2 className="h-8 w-8 animate-spin text-blue-600 mx-auto mb-4" />
+          <p className="text-gray-600">Loading your photo albums...</p>
         </div>
       </div>
     );
@@ -198,14 +198,14 @@ function Albums() {
 
   if (error) {
     return (
-      <div className=\"min-h-screen bg-gray-50 flex items-center justify-center\">
-        <div className=\"text-center\">
-          <div className=\"bg-red-50 border border-red-200 rounded-lg p-6 max-w-md\">
-            <h3 className=\"text-lg font-medium text-red-800 mb-2\">Error Loading Albums</h3>
-            <p className=\"text-red-600\">{error}</p>
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="bg-red-50 border border-red-200 rounded-lg p-6 max-w-md">
+            <h3 className="text-lg font-medium text-red-800 mb-2">Error Loading Albums</h3>
+            <p className="text-red-600">{error}</p>
             <button
               onClick={loadPersonData}
-              className=\"mt-4 px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors\"
+              className="mt-4 px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors"
             >
               Try Again
             </button>
@@ -216,59 +216,59 @@ function Albums() {
   }
 
   return (
-    <div className=\"min-h-screen bg-gray-50\">
-      <div className=\"max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8\">
+    <div className="min-h-screen bg-gray-50">
+      <div className="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
         {/* Header */}
-        <div className=\"mb-8\">
-          <h1 className=\"text-3xl font-bold text-gray-900 flex items-center gap-3\">
-            <Users className=\"h-8 w-8 text-blue-600\" />
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold text-gray-900 flex items-center gap-3">
+            <Users className="h-8 w-8 text-blue-600" />
             Photo Albums
           </h1>
-          <p className=\"mt-2 text-gray-600\">
+          <p className="mt-2 text-gray-600">
             Your photos organized by the people in them
           </p>
         </div>
 
         {/* Statistics */}
         {stats && (
-          <div className=\"grid grid-cols-1 md:grid-cols-4 gap-6 mb-8\">
-            <div className=\"bg-white rounded-lg shadow-sm p-6\">
-              <div className=\"flex items-center justify-between\">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+            <div className="bg-white rounded-lg shadow-sm p-6">
+              <div className="flex items-center justify-between">
                 <div>
-                  <p className=\"text-sm font-medium text-gray-600\">Total People</p>
-                  <p className=\"text-2xl font-bold text-gray-900\">{stats.totalPersons}</p>
+                  <p className="text-sm font-medium text-gray-600">Total People</p>
+                  <p className="text-2xl font-bold text-gray-900">{stats.totalPersons}</p>
                 </div>
-                <Users className=\"h-8 w-8 text-blue-500\" />
+                <Users className="h-8 w-8 text-blue-500" />
               </div>
             </div>
 
-            <div className=\"bg-white rounded-lg shadow-sm p-6\">
-              <div className=\"flex items-center justify-between\">
+            <div className="bg-white rounded-lg shadow-sm p-6">
+              <div className="flex items-center justify-between">
                 <div>
-                  <p className=\"text-sm font-medium text-gray-600\">Named People</p>
-                  <p className=\"text-2xl font-bold text-green-600\">{stats.namedPersons}</p>
+                  <p className="text-sm font-medium text-gray-600">Named People</p>
+                  <p className="text-2xl font-bold text-green-600">{stats.namedPersons}</p>
                 </div>
-                <User className=\"h-8 w-8 text-green-500\" />
+                <User className="h-8 w-8 text-green-500" />
               </div>
             </div>
 
-            <div className=\"bg-white rounded-lg shadow-sm p-6\">
-              <div className=\"flex items-center justify-between\">
+            <div className="bg-white rounded-lg shadow-sm p-6">
+              <div className="flex items-center justify-between">
                 <div>
-                  <p className=\"text-sm font-medium text-gray-600\">Unnamed People</p>
-                  <p className=\"text-2xl font-bold text-amber-600\">{stats.unnamedPersons}</p>
+                  <p className="text-sm font-medium text-gray-600">Unnamed People</p>
+                  <p className="text-2xl font-bold text-amber-600">{stats.unnamedPersons}</p>
                 </div>
-                <Eye className=\"h-8 w-8 text-amber-500\" />
+                <Eye className="h-8 w-8 text-amber-500" />
               </div>
             </div>
 
-            <div className=\"bg-white rounded-lg shadow-sm p-6\">
-              <div className=\"flex items-center justify-between\">
+            <div className="bg-white rounded-lg shadow-sm p-6">
+              <div className="flex items-center justify-between">
                 <div>
-                  <p className=\"text-sm font-medium text-gray-600\">Total Faces</p>
-                  <p className=\"text-2xl font-bold text-purple-600\">{stats.totalFaces}</p>
+                  <p className="text-sm font-medium text-gray-600">Total Faces</p>
+                  <p className="text-2xl font-bold text-purple-600">{stats.totalFaces}</p>
                 </div>
-                <BarChart3 className=\"h-8 w-8 text-purple-500\" />
+                <BarChart3 className="h-8 w-8 text-purple-500" />
               </div>
             </div>
           </div>
@@ -389,62 +389,63 @@ function Albums() {
               </div>
             )}
           </div>
+        </div>
         )}
 
         {/* People Grid */}
         {persons.length === 0 ? (
-          <div className=\"bg-white rounded-lg shadow-sm p-12 text-center\">
-            <Users className=\"h-16 w-16 text-gray-300 mx-auto mb-4\" />
-            <h3 className=\"text-lg font-medium text-gray-900 mb-2\">No People Detected Yet</h3>
-            <p className=\"text-gray-600 mb-6\">
+          <div className="bg-white rounded-lg shadow-sm p-12 text-center">
+            <Users className="h-16 w-16 text-gray-300 mx-auto mb-4" />
+            <h3 className="text-lg font-medium text-gray-900 mb-2">No People Detected Yet</h3>
+            <p className="text-gray-600 mb-6">
               Upload some photos with people to see them organized here
             </p>
             <button
               onClick={() => navigate('/upload')}
-              className=\"px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors\"
+              className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
             >
               Upload Photos
             </button>
           </div>
         ) : (
-          <div className=\"bg-white rounded-lg shadow-sm p-6\">
-            <div className=\"flex justify-between items-center mb-6\">
-              <h2 className=\"text-xl font-semibold text-gray-900\">
+          <div className="bg-white rounded-lg shadow-sm p-6">
+            <div className="flex justify-between items-center mb-6">
+              <h2 className="text-xl font-semibold text-gray-900">
                 People ({filteredPersons.length})
               </h2>
               {pagination && pagination.totalPersons > persons.length && (
-                <p className=\"text-sm text-gray-500\">
+                <p className="text-sm text-gray-500">
                   Showing {persons.length} of {pagination.totalPersons}
                 </p>
               )}
             </div>
 
-            <div className=\"grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6\">
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6">
               {filteredPersons.map((person) => (
                 <div
                   key={person._id}
                   onClick={() => handlePersonClick(person._id)}
-                  className=\"cursor-pointer group\"
+                  className="cursor-pointer group"
                 >
-                  <div className=\"aspect-square rounded-lg overflow-hidden bg-gray-100 mb-3 group-hover:shadow-lg transition-shadow\">
+                  <div className="aspect-square rounded-lg overflow-hidden bg-gray-100 mb-3 group-hover:shadow-lg transition-shadow">
                     {person.representativePhotoId?.thumbnailUrls?.medium ? (
                       <img
                         src={person.representativePhotoId.thumbnailUrls.medium}
                         alt={person.displayName}
-                        className=\"w-full h-full object-cover group-hover:scale-105 transition-transform\"
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform"
                       />
                     ) : (
-                      <div className=\"w-full h-full flex items-center justify-center\">
-                        <User className=\"h-12 w-12 text-gray-400\" />
+                      <div className="w-full h-full flex items-center justify-center">
+                        <User className="h-12 w-12 text-gray-400" />
                       </div>
                     )}
                   </div>
 
-                  <div className=\"text-center\">
-                    <h3 className=\"font-medium text-gray-900 truncate group-hover:text-blue-600 transition-colors\">
+                  <div className="text-center">
+                    <h3 className="font-medium text-gray-900 truncate group-hover:text-blue-600 transition-colors">
                       {person.name || person.displayName}
                     </h3>
-                    <p className=\"text-sm text-gray-500 mt-1\">
+                    <p className="text-sm text-gray-500 mt-1">
                       {person.photoCount} photo{person.photoCount !== 1 ? 's' : ''}
                     </p>
                   </div>
@@ -454,10 +455,10 @@ function Albums() {
 
             {/* Load More Button */}
             {pagination && pagination.hasNextPage && (
-              <div className=\"mt-8 text-center\">
+              <div className="mt-8 text-center">
                 <button
                   onClick={() => {/* TODO: Implement load more */}}
-                  className=\"px-6 py-3 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors\"
+                  className="px-6 py-3 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
                 >
                   Load More People
                 </button>
@@ -467,24 +468,24 @@ function Albums() {
         )}
 
         {/* Quick Actions */}
-        <div className=\"mt-8 bg-white rounded-lg shadow-sm p-6\">
-          <h3 className=\"text-lg font-medium text-gray-900 mb-4\">Quick Actions</h3>
-          <div className=\"flex flex-wrap gap-3\">
+        <div className="mt-8 bg-white rounded-lg shadow-sm p-6">
+          <h3 className="text-lg font-medium text-gray-900 mb-4">Quick Actions</h3>
+          <div className="flex flex-wrap gap-3">
             <button
               onClick={() => navigate('/upload')}
-              className=\"px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors\"
+              className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
             >
               Upload More Photos
             </button>
             <button
               onClick={() => navigate('/gallery')}
-              className=\"px-4 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 transition-colors\"
+              className="px-4 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 transition-colors"
             >
               View All Photos
             </button>
             <button
               onClick={loadPersonData}
-              className=\"px-4 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 transition-colors\"
+              className="px-4 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 transition-colors"
             >
               Refresh Albums
             </button>
@@ -492,10 +493,10 @@ function Albums() {
         </div>
 
         {/* Navigation */}
-        <div className=\"mt-6 text-center\">
+        <div className="mt-6 text-center">
           <button
             onClick={() => navigate('/')}
-            className=\"text-blue-600 hover:text-blue-800 font-medium\"
+            className="text-blue-600 hover:text-blue-800 font-medium"
           >
             ← Back to Dashboard
           </button>

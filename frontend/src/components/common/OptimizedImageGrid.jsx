@@ -1,5 +1,5 @@
 import { memo, useMemo } from 'react';
-import { useVirtualScroll } from '../hooks/useOptimization';
+import { useVirtualScroll } from '../../hooks/useOptimization';
 import LazyImage from './LazyImage';
 
 const VirtualGrid = memo(({

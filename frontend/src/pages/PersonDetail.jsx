@@ -160,10 +160,10 @@ function PersonDetail() {
 
   if (loading) {
     return (
-      <div className=\"min-h-screen bg-gray-50 flex items-center justify-center\">
-        <div className=\"text-center\">
-          <Loader2 className=\"h-8 w-8 animate-spin text-blue-600 mx-auto mb-4\" />
-          <p className=\"text-gray-600\">Loading person details...</p>
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <Loader2 className="h-8 w-8 animate-spin text-blue-600 mx-auto mb-4" />
+          <p className="text-gray-600">Loading person details...</p>
         </div>
       </div>
     );
@@ -171,21 +171,21 @@ function PersonDetail() {
 
   if (error) {
     return (
-      <div className=\"min-h-screen bg-gray-50 flex items-center justify-center\">
-        <div className=\"text-center\">
-          <div className=\"bg-red-50 border border-red-200 rounded-lg p-6 max-w-md\">
-            <h3 className=\"text-lg font-medium text-red-800 mb-2\">Error Loading Person</h3>
-            <p className=\"text-red-600\">{error}</p>
-            <div className=\"mt-4 flex gap-3 justify-center\">
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="bg-red-50 border border-red-200 rounded-lg p-6 max-w-md">
+            <h3 className="text-lg font-medium text-red-800 mb-2">Error Loading Person</h3>
+            <p className="text-red-600">{error}</p>
+            <div className="mt-4 flex gap-3 justify-center">
               <button
                 onClick={loadPersonData}
-                className=\"px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors\"
+                className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors"
               >
                 Try Again
               </button>
               <button
                 onClick={() => navigate('/albums')}
-                className=\"px-4 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 transition-colors\"
+                className="px-4 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 transition-colors"
               >
                 Back to Albums
               </button>
@@ -198,12 +198,12 @@ function PersonDetail() {
 
   if (!person) {
     return (
-      <div className=\"min-h-screen bg-gray-50 flex items-center justify-center\">
-        <div className=\"text-center\">
-          <h3 className=\"text-lg font-medium text-gray-900 mb-2\">Person Not Found</h3>
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <h3 className="text-lg font-medium text-gray-900 mb-2">Person Not Found</h3>
           <button
             onClick={() => navigate('/albums')}
-            className=\"px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors\"
+            className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
           >
             Back to Albums
           </button>
@@ -213,31 +213,31 @@ function PersonDetail() {
   }
 
   return (
-    <div className=\"min-h-screen bg-gray-50\">
-      <div className=\"max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8\">
+    <div className="min-h-screen bg-gray-50">
+      <div className="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
         {/* Header */}
-        <div className=\"mb-8\">
+        <div className="mb-8">
           <button
             onClick={() => navigate('/albums')}
-            className=\"flex items-center gap-2 text-blue-600 hover:text-blue-800 mb-4\"
+            className="flex items-center gap-2 text-blue-600 hover:text-blue-800 mb-4"
           >
-            <ArrowLeft className=\"h-4 w-4\" />
+            <ArrowLeft className="h-4 w-4" />
             Back to Albums
           </button>
 
-          <div className=\"flex items-start justify-between\">
-            <div className=\"flex items-start gap-6\">
+          <div className="flex items-start justify-between">
+            <div className="flex items-start gap-6">
               {/* Representative Photo */}
-              <div className=\"w-24 h-24 rounded-lg overflow-hidden bg-gray-100 flex-shrink-0\">
+              <div className="w-24 h-24 rounded-lg overflow-hidden bg-gray-100 flex-shrink-0">
                 {person.representativePhotoId?.thumbnailUrls?.medium ? (
                   <img
                     src={person.representativePhotoId.thumbnailUrls.medium}
                     alt={person.displayName}
-                    className=\"w-full h-full object-cover\"
+                    className="w-full h-full object-cover"
                   />
                 ) : (
-                  <div className=\"w-full h-full flex items-center justify-center\">
-                    <User className=\"h-8 w-8 text-gray-400\" />
+                  <div className="w-full h-full flex items-center justify-center">
+                    <User className="h-8 w-8 text-gray-400" />
                   </div>
                 )}
               </div>
@@ -245,9 +245,9 @@ function PersonDetail() {
               {/* Person Info */}
               <div>
                 {editingName ? (
-                  <div className=\"flex items-center gap-3 mb-2\">
+                  <div className="flex items-center gap-3 mb-2">
                     <input
-                      type=\"text\"
+                      type="text"
                       value={newName}
                       onChange={(e) => setNewName(e.target.value)}
                       onKeyDown={(e) => {
@@ -257,17 +257,17 @@ function PersonDetail() {
                           setNewName(person.name || '');
                         }
                       }}
-                      className=\"text-2xl font-bold text-gray-900 border-2 border-blue-500 rounded px-3 py-1 min-w-0\"
-                      placeholder=\"Enter person's name...\"
+                      className="text-2xl font-bold text-gray-900 border-2 border-blue-500 rounded px-3 py-1 min-w-0"
+                      placeholder="Enter person's name..."
                       autoFocus
                       disabled={savingName}
                     />
                     <button
                       onClick={handleSaveName}
                       disabled={savingName}
-                      className=\"p-2 text-green-600 hover:text-green-800 disabled:text-gray-400\"
+                      className="p-2 text-green-600 hover:text-green-800 disabled:text-gray-400"
                     >
-                      {savingName ? <Loader2 className=\"h-5 w-5 animate-spin\" /> : <CheckCircle className=\"h-5 w-5\" />}
+                      {savingName ? <Loader2 className="h-5 w-5 animate-spin" /> : <CheckCircle className="h-5 w-5" />}
                     </button>
                     <button
                       onClick={() => {
@@ -275,29 +275,29 @@ function PersonDetail() {
                         setNewName(person.name || '');
                       }}
                       disabled={savingName}
-                      className=\"p-2 text-red-600 hover:text-red-800 disabled:text-gray-400\"
+                      className="p-2 text-red-600 hover:text-red-800 disabled:text-gray-400"
                     >
-                      <X className=\"h-5 w-5\" />
+                      <X className="h-5 w-5" />
                     </button>
                   </div>
                 ) : (
-                  <div className=\"flex items-center gap-3 mb-2\">
-                    <h1 className=\"text-2xl font-bold text-gray-900\">
+                  <div className="flex items-center gap-3 mb-2">
+                    <h1 className="text-2xl font-bold text-gray-900">
                       {person.name || person.displayName}
                     </h1>
                     <button
                       onClick={() => setEditingName(true)}
-                      className=\"p-1 text-gray-400 hover:text-blue-600 transition-colors\"
-                      title=\"Edit name\"
+                      className="p-1 text-gray-400 hover:text-blue-600 transition-colors"
+                      title="Edit name"
                     >
-                      <Edit3 className=\"h-4 w-4\" />
+                      <Edit3 className="h-4 w-4" />
                     </button>
                   </div>
                 )}
 
-                <div className=\"flex items-center gap-4 text-sm text-gray-600\">
-                  <span className=\"flex items-center gap-1\">
-                    <Camera className=\"h-4 w-4\" />
+                <div className="flex items-center gap-4 text-sm text-gray-600">
+                  <span className="flex items-center gap-1">
+                    <Camera className="h-4 w-4" />
                     {person.photoCount} photo{person.photoCount !== 1 ? 's' : ''}
                   </span>
                   <span>
@@ -308,44 +308,66 @@ function PersonDetail() {
             </div>
 
             {/* Actions */}
-            <div className=\"flex gap-2\">
+            <div className="flex gap-2">
               <button
                 onClick={() => setShowDeleteConfirm(true)}
-                className=\"p-2 text-red-600 hover:text-red-800 hover:bg-red-50 rounded transition-colors\"
-                title=\"Delete person\"
+                className="p-2 text-red-600 hover:text-red-800 hover:bg-red-50 rounded transition-colors"
+                title="Delete person"
               >
-                <Trash2 className=\"h-5 w-5\" />
+                <Trash2 className="h-5 w-5" />
               </button>
             </div>
           </div>
         </div>
 
         {/* Photos Grid */}
-        <div className=\"bg-white rounded-lg shadow-sm p-6\">
-          <h2 className=\"text-xl font-semibold text-gray-900 mb-6\">
+        <div className="bg-white rounded-lg shadow-sm p-6">
+          <h2 className="text-xl font-semibold text-gray-900 mb-6">
             Photos ({photos.length})
           </h2>
 
           {photos.length === 0 ? (
-            <div className=\"text-center py-12\">
-              <Camera className=\"h-12 w-12 text-gray-300 mx-auto mb-4\" />
-              <h3 className=\"text-lg font-medium text-gray-900 mb-2\">No Photos Found</h3>
-              <p className=\"text-gray-600\">
+            <div className="text-center py-12">
+              <Camera className="h-12 w-12 text-gray-300 mx-auto mb-4" />
+              <h3 className="text-lg font-medium text-gray-900 mb-2">No Photos Found</h3>
+              <p className="text-gray-600">
                 This person doesn't appear in any photos yet.
               </p>
             </div>
           ) : (
-            <div className=\"grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4\">
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
               {photos.map((photo) => (
                 <div
                   key={photo._id}
-                  className=\"relative group\"
+                  className="relative group cursor-pointer"
+                  onClick={() => handlePhotoClick(photo)}
                 >
-                  <img
-                    src={photo.thumbnailUrls?.medium || photo.originalUrl}
-                    alt={`Photo ${photo._id}`}
-                    className=\"w-full h-full object-cover group-hover:scale-105 transition-transform\"
-                  />
+                  <div className="aspect-square rounded-lg overflow-hidden bg-gray-100">
+                    <img
+                      src={photo.thumbnailUrls?.medium || photo.originalUrl}
+                      alt={`Photo ${photo._id}`}
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform"
+                    />
+                    {/* Overlay with actions */}
+                    <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-30 transition-all duration-200 flex items-center justify-center">
+                      <div className="opacity-0 group-hover:opacity-100 flex gap-2">
+                        <button
+                          onClick={(e) => { e.stopPropagation(); openLightbox(photo); }}
+                          className="p-2 bg-white text-gray-700 rounded-full hover:bg-gray-100 transition-colors"
+                          title="View photo"
+                        >
+                          <Eye className="h-4 w-4" />
+                        </button>
+                        <button
+                          onClick={(e) => { e.stopPropagation(); setShowPhotoDeleteConfirm(photo._id); }}
+                          className="p-2 bg-white text-red-600 rounded-full hover:bg-red-50 transition-colors"
+                          title="Delete photo"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </button>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               ))}
             </div>
@@ -353,10 +375,10 @@ function PersonDetail() {
 
           {/* Pagination */}
           {pagination && pagination.hasNextPage && (
-            <div className=\"mt-8 text-center\">
+            <div className="mt-8 text-center">
               <button
                 onClick={() => {/* TODO: Implement load more */}}
-                className=\"px-6 py-3 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors\"
+                className="px-6 py-3 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
               >
                 Load More Photos
               </button>
@@ -459,36 +481,36 @@ function PersonDetail() {
 
       {/* Delete Confirmation Modal */}
       {showDeleteConfirm && (
-        <div className=\"fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50\">
-          <div className=\"bg-white rounded-lg p-6 max-w-md w-mx mx-4\">
-            <h3 className=\"text-lg font-semibold text-gray-900 mb-4\">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 max-w-md w-mx mx-4">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">
               Delete Person Cluster?
             </h3>
-            <p className=\"text-gray-600 mb-6\">
+            <p className="text-gray-600 mb-6">
               This will permanently delete this person cluster. The actual photos will not be deleted.
               This action cannot be undone.
             </p>
-            <div className=\"flex gap-3 justify-end\">
+            <div className="flex gap-3 justify-end">
               <button
                 onClick={() => setShowDeleteConfirm(false)}
                 disabled={deleting}
-                className=\"px-4 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 transition-colors disabled:opacity-50\"
+                className="px-4 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 transition-colors disabled:opacity-50"
               >
                 Cancel
               </button>
               <button
                 onClick={handleDeletePerson}
                 disabled={deleting}
-                className=\"px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors disabled:opacity-50 flex items-center gap-2\"
+                className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors disabled:opacity-50 flex items-center gap-2"
               >
                 {deleting ? (
                   <>
-                    <Loader2 className=\"h-4 w-4 animate-spin\" />
+                    <Loader2 className="h-4 w-4 animate-spin" />
                     Deleting...
                   </>
                 ) : (
                   <>
-                    <Trash2 className=\"h-4 w-4\" />
+                    <Trash2 className="h-4 w-4" />
                     Delete
                   </>
                 )}
