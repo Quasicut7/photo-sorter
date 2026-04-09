@@ -23,6 +23,7 @@ function Gallery() {
   const [selectedPhoto, setSelectedPhoto] = useState(null);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(null);
   const [deleting, setDeleting] = useState(false);
+  const [zoomLevel, setZoomLevel] = useState(1);
 
   const navigate = useNavigate();
   const { user } = useAuth();
@@ -51,6 +52,12 @@ function Gallery() {
     window.addEventListener('keydown', onKeyDown);
     return () => window.removeEventListener('keydown', onKeyDown);
   }, [selectedPhoto, photos]);
+
+  useEffect(() => {
+    if (selectedPhoto) {
+      setZoomLevel(1);
+    }
+  }, [selectedPhoto?._id]);
 
   const loadPhotos = async (page = 1) => {
     try {
@@ -111,10 +118,18 @@ function Gallery() {
 
   const openLightbox = (photo) => {
     setSelectedPhoto(photo);
+    setZoomLevel(1);
   };
 
   const closeLightbox = () => {
     setSelectedPhoto(null);
+    setZoomLevel(1);
+  };
+
+  const handleLightboxWheel = (event) => {
+    event.preventDefault();
+    const zoomDelta = event.deltaY < 0 ? 0.12 : -0.12;
+    setZoomLevel((prev) => Math.min(4, Math.max(1, Number((prev + zoomDelta).toFixed(2)))));
   };
 
   const nextPhoto = () => {
@@ -389,11 +404,19 @@ function Gallery() {
       {/* Photo Lightbox */}
       {selectedPhoto && (
         <div className="fixed inset-0 bg-black bg-opacity-90 flex items-center justify-center z-50">
-          <div className="w-full h-full px-3 py-3 md:px-6 md:py-6 flex items-center justify-center">
+          <div
+            className="w-full h-full px-3 py-3 md:px-6 md:py-6 flex items-center justify-center"
+            onWheel={handleLightboxWheel}
+          >
             <img
               src={selectedPhoto.originalUrl}
               alt={selectedPhoto.fileName}
               className="block h-[88vh] md:h-[90vh] w-auto max-w-[96vw] object-contain rounded-lg shadow-2xl"
+              style={{
+                transform: `scale(${zoomLevel})`,
+                transition: 'transform 120ms ease-out',
+                transformOrigin: 'center center',
+              }}
             />
 
             {/* Lightbox Controls */}
