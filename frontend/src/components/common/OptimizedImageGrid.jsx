@@ -75,7 +75,7 @@ const OptimizedImageGrid = memo(({
         <LazyImage
           src={image.thumbnailUrls?.medium || image.originalUrl}
           alt={image.fileName || `Image ${index + 1}`}
-          className="w-full h-full object-cover cursor-pointer group-hover:scale-105 transition-transform"
+          className="w-full h-full object-cover cursor-default group-hover:scale-105 transition-transform"
           onClick={() => onImageClick?.(image)}
           placeholder={
             <div className="w-full h-full bg-gray-200 animate-pulse flex items-center justify-center">

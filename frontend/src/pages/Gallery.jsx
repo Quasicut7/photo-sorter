@@ -24,6 +24,9 @@ function Gallery() {
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(null);
   const [deleting, setDeleting] = useState(false);
   const [zoomLevel, setZoomLevel] = useState(1);
+  const [panOffset, setPanOffset] = useState({ x: 0, y: 0 });
+  const [isDragging, setIsDragging] = useState(false);
+  const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
 
   const navigate = useNavigate();
   const { user } = useAuth();
@@ -56,6 +59,8 @@ function Gallery() {
   useEffect(() => {
     if (selectedPhoto) {
       setZoomLevel(1);
+      setPanOffset({ x: 0, y: 0 });
+      setIsDragging(false);
     }
   }, [selectedPhoto?._id]);
 
@@ -119,17 +124,74 @@ function Gallery() {
   const openLightbox = (photo) => {
     setSelectedPhoto(photo);
     setZoomLevel(1);
+    setPanOffset({ x: 0, y: 0 });
+    setIsDragging(false);
   };
 
   const closeLightbox = () => {
     setSelectedPhoto(null);
     setZoomLevel(1);
+    setPanOffset({ x: 0, y: 0 });
+    setIsDragging(false);
+  };
+
+  const zoomIn = () => {
+    setZoomLevel((prev) => Math.min(4, Number((prev + 0.2).toFixed(2))));
+  };
+
+  const zoomOut = () => {
+    setZoomLevel((prev) => {
+      const next = Math.max(1, Number((prev - 0.2).toFixed(2)));
+      if (next === 1) {
+        setPanOffset({ x: 0, y: 0 });
+      }
+      return next;
+    });
+  };
+
+  const resetView = () => {
+    setZoomLevel(1);
+    setPanOffset({ x: 0, y: 0 });
+    setIsDragging(false);
   };
 
   const handleLightboxWheel = (event) => {
     event.preventDefault();
     const zoomDelta = event.deltaY < 0 ? 0.12 : -0.12;
-    setZoomLevel((prev) => Math.min(4, Math.max(1, Number((prev + zoomDelta).toFixed(2)))));
+    setZoomLevel((prev) => {
+      const next = Math.min(4, Math.max(1, Number((prev + zoomDelta).toFixed(2))));
+      if (next === 1) {
+        setPanOffset({ x: 0, y: 0 });
+      }
+      return next;
+    });
+  };
+
+  const handleDragStart = (event) => {
+    if (zoomLevel <= 1) {
+      return;
+    }
+    setIsDragging(true);
+    setDragStart({
+      x: event.clientX - panOffset.x,
+      y: event.clientY - panOffset.y,
+    });
+  };
+
+  const handleDragMove = (event) => {
+    if (!isDragging || zoomLevel <= 1) {
+      return;
+    }
+    setPanOffset({
+      x: event.clientX - dragStart.x,
+      y: event.clientY - dragStart.y,
+    });
+  };
+
+  const stopDragging = () => {
+    if (isDragging) {
+      setIsDragging(false);
+    }
   };
 
   const nextPhoto = () => {
@@ -329,7 +391,7 @@ function Gallery() {
                     <img
                       src={photo.thumbnailUrls?.medium || photo.originalUrl}
                       alt={`Photo ${photo.fileName}`}
-                      className="w-full h-full object-cover cursor-zoom-in group-hover:scale-105 transition-transform"
+                      className="w-full h-full object-cover cursor-default group-hover:scale-105 transition-transform"
                     />
 
                     {/* Overlay with actions */}
@@ -407,20 +469,51 @@ function Gallery() {
           <div
             className="w-full h-full px-3 py-3 md:px-6 md:py-6 flex items-center justify-center"
             onWheel={handleLightboxWheel}
+            onMouseMove={handleDragMove}
+            onMouseUp={stopDragging}
+            onMouseLeave={stopDragging}
           >
             <img
               src={selectedPhoto.originalUrl}
               alt={selectedPhoto.fileName}
               className="block h-[88vh] md:h-[90vh] w-auto max-w-[96vw] object-contain rounded-lg shadow-2xl"
+              onMouseDown={handleDragStart}
               style={{
-                transform: `scale(${zoomLevel})`,
+                transform: `translate(${panOffset.x}px, ${panOffset.y}px) scale(${zoomLevel})`,
                 transition: 'transform 120ms ease-out',
                 transformOrigin: 'center center',
+                cursor: 'default',
+                userSelect: 'none',
               }}
+              draggable={false}
             />
 
-            {/* Lightbox Controls */}
             <div className="absolute top-4 right-4 flex gap-2">
+              <button
+                onClick={zoomOut}
+                className="w-11 h-11 bg-white text-gray-700 rounded-full hover:bg-gray-100 transition-colors flex items-center justify-center shadow-md"
+                title="Zoom out"
+              >
+                -
+              </button>
+              <button
+                onClick={zoomIn}
+                className="w-11 h-11 bg-white text-gray-700 rounded-full hover:bg-gray-100 transition-colors flex items-center justify-center shadow-md"
+                title="Zoom in"
+              >
+                +
+              </button>
+              <button
+                onClick={resetView}
+                className="px-3 h-11 bg-white text-gray-700 rounded-full hover:bg-gray-100 transition-colors flex items-center justify-center shadow-md text-sm font-medium"
+                title="Reset view"
+              >
+                Reset
+              </button>
+            </div>
+
+            {/* Lightbox Controls */}
+            <div className="absolute top-4 left-4 flex gap-2">
               <button
                 onClick={closeLightbox}
                 className="w-11 h-11 bg-white text-gray-700 rounded-full hover:bg-gray-100 transition-colors flex items-center justify-center shadow-md"
