@@ -508,11 +508,7 @@ function PersonDetail() {
 
         {/* Photos Grid */}
         <div className="bg-white rounded-lg shadow-sm p-6">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
-            <h2 className="text-xl font-semibold text-gray-900">
-              Photos ({photos.length})
-            </h2>
-
+          <div className="flex justify-end mb-6">
             <select
               value={gridDensity}
               onChange={(e) => setGridDensity(e.target.value)}

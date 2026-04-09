@@ -1,14 +1,13 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { getPersons, getPersonStats } from '../services/personService';
+import { getPersons } from '../services/personService';
 import { useDebounce } from '../hooks/useOptimization';
-import { Users, User, Eye, BarChart3, Loader2, Search, ArrowLeft } from 'lucide-react';
+import { Users, User, Loader2, Search, ArrowLeft } from 'lucide-react';
 
 function Albums() {
   const navigate = useNavigate();
 
   const [persons, setPersons] = useState([]);
-  const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [pagination, setPagination] = useState(null);
@@ -33,10 +32,7 @@ function Albums() {
         setLoading(true);
         setError(null);
 
-        const [personsResult, statsResult] = await Promise.all([
-          getPersons(1, 24),
-          getPersonStats(),
-        ]);
+        const personsResult = await getPersons(1, 24);
 
         if (personsResult.success) {
           setPersons(personsResult.persons || []);
@@ -45,9 +41,6 @@ function Albums() {
           setError(personsResult.error || 'Failed to load albums');
         }
 
-        if (statsResult.success) {
-          setStats(statsResult.stats || null);
-        }
       } catch (err) {
         setError('Failed to load album data');
       } finally {
@@ -135,15 +128,6 @@ function Albums() {
           <p className="mt-2 text-gray-600">Your photos organized by the people in them</p>
         </div>
 
-        {stats && (
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-            <StatCard label="Total People" value={stats.totalPersons} icon={<Users className="h-8 w-8 text-blue-500" />} />
-            <StatCard label="Named People" value={stats.namedPersons} icon={<User className="h-8 w-8 text-green-500" />} />
-            <StatCard label="Unnamed People" value={stats.unnamedPersons} icon={<Eye className="h-8 w-8 text-amber-500" />} />
-            <StatCard label="Total Faces" value={stats.totalFaces} icon={<BarChart3 className="h-8 w-8 text-purple-500" />} />
-          </div>
-        )}
-
         {persons.length > 0 && (
           <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
             <div className="flex flex-col sm:flex-row gap-4">
@@ -185,15 +169,6 @@ function Albums() {
           </div>
         ) : (
           <div className="bg-white rounded-lg shadow-sm p-6">
-            <div className="flex justify-between items-center mb-6">
-              <h2 className="text-xl font-semibold text-gray-900">People ({filteredPersons.length})</h2>
-              {pagination && pagination.totalPersons > persons.length && (
-                <p className="text-sm text-gray-500">
-                  Showing {persons.length} of {pagination.totalPersons}
-                </p>
-              )}
-            </div>
-
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6">
               {filteredPersons.map((person) => (
                 <button
@@ -227,20 +202,6 @@ function Albums() {
             </div>
           </div>
         )}
-      </div>
-    </div>
-  );
-}
-
-function StatCard({ label, value, icon }) {
-  return (
-    <div className="bg-white rounded-lg shadow-sm p-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <p className="text-sm font-medium text-gray-600">{label}</p>
-          <p className="text-2xl font-bold text-gray-900">{value ?? 0}</p>
-        </div>
-        {icon}
       </div>
     </div>
   );
