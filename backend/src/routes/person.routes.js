@@ -16,6 +16,9 @@ router.get('/stats', personController.getPersonStats);
 // POST /api/persons/merge - Merge two person clusters
 router.post('/merge', personController.mergePersons);
 
+// PUT /api/persons/:id/photos - Manually add/remove photos in a person album
+router.put('/:id/photos', personController.updatePersonPhotos);
+
 // GET /api/persons/:id - Get person with their photos
 router.get('/:id', personController.getPersonById);
 

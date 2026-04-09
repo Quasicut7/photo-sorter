@@ -57,10 +57,10 @@ class PersonController {
       const userId = req.user.id;
       const page = parseInt(req.query.page) || 1;
       const limit = parseInt(req.query.limit) || 20;
-      const skip = (page - 1) * limit;
 
       const person = await Person.findOne({ _id: id, userId })
-        .populate('representativePhotoId', 'originalUrl thumbnailUrls');
+        .populate('representativePhotoId', 'originalUrl thumbnailUrls')
+        .populate('manualPhotoIds', 'originalUrl thumbnailUrls uploadedAt fileSize metadata fileName faceCount processedStatus');
 
       if (!person) {
         return res.status(404).json({
@@ -72,9 +72,7 @@ class PersonController {
       // Get photos for this person via face clusters
       const faceClusters = await FaceCluster.find({ personId: id, userId })
         .populate('photoId', 'originalUrl thumbnailUrls uploadedAt fileSize metadata')
-        .sort({ createdAt: -1 })
-        .skip(skip)
-        .limit(limit);
+        .sort({ createdAt: -1 });
 
       // Extract unique photos (in case multiple faces of same person in one photo)
       const photoMap = new Map();
@@ -87,19 +85,32 @@ class PersonController {
         }
       });
 
-      const photos = Array.from(photoMap.values());
-      const totalClusters = await FaceCluster.countDocuments({ personId: id, userId });
+      // Add manually attached photos (if not already present via face clusters)
+      (person.manualPhotoIds || []).forEach((photo) => {
+        if (photo && !photoMap.has(photo._id.toString())) {
+          photoMap.set(photo._id.toString(), {
+            ...photo.toObject(),
+            manuallyAdded: true,
+          });
+        }
+      });
+
+      const photos = Array.from(photoMap.values())
+        .sort((a, b) => new Date(b.uploadedAt || 0) - new Date(a.uploadedAt || 0));
+      const totalPhotos = photos.length;
+      const totalPages = Math.max(1, Math.ceil(totalPhotos / limit));
+      const paginatedPhotos = photos.slice((page - 1) * limit, page * limit);
 
       res.json({
         success: true,
         data: {
           person,
-          photos,
+          photos: paginatedPhotos,
           pagination: {
             currentPage: page,
-            totalPages: Math.ceil(totalClusters / limit),
-            totalPhotos: photos.length,
-            hasNextPage: page < Math.ceil(totalClusters / limit),
+            totalPages,
+            totalPhotos,
+            hasNextPage: page < totalPages,
             hasPrevPage: page > 1,
           },
         },
@@ -257,6 +268,13 @@ class PersonController {
         primaryPerson.name = secondaryPerson.name;
       }
 
+      // Merge manual photo selections without duplicates
+      const mergedManual = new Set([
+        ...(primaryPerson.manualPhotoIds || []).map((id) => id.toString()),
+        ...(secondaryPerson.manualPhotoIds || []).map((id) => id.toString()),
+      ]);
+      primaryPerson.manualPhotoIds = Array.from(mergedManual);
+
       await primaryPerson.save();
 
       // Delete secondary person
@@ -313,6 +331,82 @@ class PersonController {
       res.status(500).json({
         success: false,
         error: 'Failed to fetch person statistics',
+      });
+    }
+  }
+
+  /**
+   * Manually add/remove photos from a person album
+   * PUT /api/persons/:id/photos
+   */
+  async updatePersonPhotos(req, res) {
+    try {
+      const { id } = req.params;
+      const userId = req.user.id;
+      const { addPhotoIds = [], removePhotoIds = [] } = req.body;
+
+      if (!Array.isArray(addPhotoIds) || !Array.isArray(removePhotoIds)) {
+        return res.status(400).json({
+          success: false,
+          error: 'addPhotoIds and removePhotoIds must be arrays',
+        });
+      }
+
+      const person = await Person.findOne({ _id: id, userId });
+      if (!person) {
+        return res.status(404).json({
+          success: false,
+          error: 'Person not found',
+        });
+      }
+
+      const requestedIds = Array.from(new Set([...addPhotoIds, ...removePhotoIds]));
+      const validPhotos = await Photo.find({
+        _id: { $in: requestedIds },
+        userId,
+      }).select('_id');
+      const validIdSet = new Set(validPhotos.map((p) => p._id.toString()));
+
+      const addSet = new Set(addPhotoIds.filter((pid) => validIdSet.has(pid.toString())).map(String));
+      const removeSet = new Set(removePhotoIds.filter((pid) => validIdSet.has(pid.toString())).map(String));
+
+      const currentManual = new Set((person.manualPhotoIds || []).map((pid) => pid.toString()));
+      addSet.forEach((pid) => currentManual.add(pid));
+      removeSet.forEach((pid) => currentManual.delete(pid));
+      person.manualPhotoIds = Array.from(currentManual);
+
+      // Recalculate photo count as unique photos from face clusters + manual additions.
+      const clusteredPhotoIds = await FaceCluster.distinct('photoId', { personId: id, userId });
+      const allAlbumPhotoIds = new Set([
+        ...clusteredPhotoIds.map((pid) => pid.toString()),
+        ...person.manualPhotoIds.map((pid) => pid.toString()),
+      ]);
+      person.photoCount = allAlbumPhotoIds.size;
+
+      if (!person.representativePhotoId && person.manualPhotoIds.length > 0) {
+        person.representativePhotoId = person.manualPhotoIds[0];
+      }
+
+      await person.save();
+
+      const updated = await Person.findById(person._id)
+        .populate('representativePhotoId', 'originalUrl thumbnailUrls')
+        .populate('manualPhotoIds', 'originalUrl thumbnailUrls uploadedAt fileSize metadata fileName faceCount processedStatus');
+
+      res.json({
+        success: true,
+        message: 'Person album updated successfully',
+        data: {
+          person: updated,
+          addedCount: addSet.size,
+          removedCount: removeSet.size,
+        },
+      });
+    } catch (error) {
+      console.error('Update person photos error:', error);
+      res.status(500).json({
+        success: false,
+        error: 'Failed to update person album photos',
       });
     }
   }

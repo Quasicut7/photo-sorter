@@ -67,6 +67,33 @@ export const updatePersonName = async (personId, name) => {
   }
 };
 
+// Manually add/remove photos from a person album
+export const updatePersonPhotos = async (personId, addPhotoIds = [], removePhotoIds = []) => {
+  try {
+    const response = await api.put(`/persons/${personId}/photos`, {
+      addPhotoIds,
+      removePhotoIds,
+    });
+
+    if (response.data.success) {
+      return {
+        success: true,
+        person: response.data.data.person,
+        addedCount: response.data.data.addedCount,
+        removedCount: response.data.data.removedCount,
+        message: response.data.message,
+      };
+    }
+
+    return { success: false, error: 'Failed to update person album photos' };
+  } catch (error) {
+    return {
+      success: false,
+      error: error.response?.data?.error || error.message || 'Failed to update person album photos',
+    };
+  }
+};
+
 // Delete a person cluster
 export const deletePerson = async (personId) => {
   try {

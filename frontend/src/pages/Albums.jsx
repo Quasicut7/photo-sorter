@@ -18,6 +18,16 @@ function Albums() {
   const debouncedSearchTerm = useDebounce(searchTerm, 300);
 
   useEffect(() => {
+    const savedScrollY = sessionStorage.getItem('albumsScrollY');
+    if (savedScrollY) {
+      window.requestAnimationFrame(() => {
+        window.scrollTo({ top: Number(savedScrollY), behavior: 'auto' });
+      });
+      sessionStorage.removeItem('albumsScrollY');
+    }
+  }, []);
+
+  useEffect(() => {
     const loadPersonData = async () => {
       try {
         setLoading(true);
@@ -77,6 +87,11 @@ function Albums() {
 
     return filtered;
   }, [persons, debouncedSearchTerm, sortBy]);
+
+  const handleOpenPerson = (personId) => {
+    sessionStorage.setItem('albumsScrollY', String(window.scrollY));
+    navigate(`/albums/${personId}`);
+  };
 
   if (loading) {
     return (
@@ -183,7 +198,7 @@ function Albums() {
               {filteredPersons.map((person) => (
                 <button
                   key={person._id}
-                  onClick={() => navigate(`/albums/${person._id}`)}
+                  onClick={() => handleOpenPerson(person._id)}
                   className="text-left cursor-pointer group"
                 >
                   <div className="aspect-square rounded-lg overflow-hidden bg-gray-100 mb-3 group-hover:shadow-lg transition-shadow">

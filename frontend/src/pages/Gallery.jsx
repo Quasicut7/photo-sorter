@@ -15,6 +15,7 @@ function Gallery() {
   const [searchTerm, setSearchTerm] = useState('');
   const [sortBy, setSortBy] = useState('newest');
   const [filterStatus, setFilterStatus] = useState('all');
+  const [gridDensity, setGridDensity] = useState('comfortable');
 
   // Debounce search term for better performance
   const debouncedSearchTerm = useDebounce(searchTerm, 300);
@@ -29,6 +30,27 @@ function Gallery() {
   useEffect(() => {
     loadPhotos(1);
   }, [sortBy, filterStatus, debouncedSearchTerm]);
+
+  useEffect(() => {
+    if (!selectedPhoto) {
+      return;
+    }
+
+    const onKeyDown = (event) => {
+      if (event.key === 'Escape') {
+        closeLightbox();
+      }
+      if (event.key === 'ArrowRight') {
+        nextPhoto();
+      }
+      if (event.key === 'ArrowLeft') {
+        prevPhoto();
+      }
+    };
+
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, [selectedPhoto, photos]);
 
   const loadPhotos = async (page = 1) => {
     try {
@@ -125,6 +147,12 @@ function Gallery() {
     }
   };
 
+  const gridClassNameByDensity = {
+    compact: 'grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-3',
+    comfortable: 'grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4',
+    large: 'grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5',
+  };
+
   if (loading && photos.length === 0) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -182,7 +210,7 @@ function Gallery() {
             </div>
 
             {/* Sort */}
-            <div className="flex gap-4">
+            <div className="flex gap-4 flex-wrap">
               <select
                 value={sortBy}
                 onChange={(e) => setSortBy(e.target.value)}
@@ -205,6 +233,17 @@ function Gallery() {
                 <option value="processing">Processing</option>
                 <option value="pending">Pending</option>
                 <option value="failed">Failed</option>
+              </select>
+
+              <select
+                value={gridDensity}
+                onChange={(e) => setGridDensity(e.target.value)}
+                className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                aria-label="Grid density"
+              >
+                <option value="compact">Compact Grid</option>
+                <option value="comfortable">Comfortable Grid</option>
+                <option value="large">Large Grid</option>
               </select>
             </div>
           </div>
@@ -256,15 +295,26 @@ function Gallery() {
               </h2>
             </div>
 
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
+            <div className={gridClassNameByDensity[gridDensity]}>
               {photos.map((photo) => (
-                <div key={photo._id} className="relative group">
+                <div
+                  key={photo._id}
+                  className="relative group outline-none rounded-lg"
+                  role="button"
+                  tabIndex={0}
+                  onClick={() => openLightbox(photo)}
+                  onKeyDown={(event) => {
+                    if (event.key === 'Enter' || event.key === ' ') {
+                      event.preventDefault();
+                      openLightbox(photo);
+                    }
+                  }}
+                >
                   <div className="aspect-square rounded-lg overflow-hidden bg-gray-100">
                     <img
                       src={photo.thumbnailUrls?.medium || photo.originalUrl}
                       alt={`Photo ${photo.fileName}`}
-                      className="w-full h-full object-cover cursor-pointer group-hover:scale-105 transition-transform"
-                      onClick={() => openLightbox(photo)}
+                      className="w-full h-full object-cover cursor-zoom-in group-hover:scale-105 transition-transform"
                     />
 
                     {/* Overlay with actions */}
@@ -272,12 +322,14 @@ function Gallery() {
                       <div className="opacity-0 group-hover:opacity-100 flex gap-2">
                         <button
                           onClick={() => openLightbox(photo)}
+                          type="button"
                           className="p-2 bg-white text-gray-700 rounded-full hover:bg-gray-100 transition-colors"
                           title="View photo"
                         >
                           <Eye className="h-4 w-4" />
                         </button>
                         <button
+                          type="button"
                           onClick={(e) => {
                             e.stopPropagation();
                             setShowDeleteConfirm(photo._id);
@@ -337,18 +389,18 @@ function Gallery() {
       {/* Photo Lightbox */}
       {selectedPhoto && (
         <div className="fixed inset-0 bg-black bg-opacity-90 flex items-center justify-center z-50">
-          <div className="w-full h-full p-4 md:p-6 flex items-center justify-center">
+          <div className="w-full h-full px-3 py-3 md:px-6 md:py-6 flex items-center justify-center">
             <img
               src={selectedPhoto.originalUrl}
               alt={selectedPhoto.fileName}
-              className="w-auto h-auto max-w-[calc(100vw-2rem)] md:max-w-[calc(100vw-6rem)] max-h-[calc(100vh-9rem)] object-contain rounded-lg shadow-2xl"
+              className="block h-[88vh] md:h-[90vh] w-auto max-w-[96vw] object-contain rounded-lg shadow-2xl"
             />
 
             {/* Lightbox Controls */}
             <div className="absolute top-4 right-4 flex gap-2">
               <button
                 onClick={closeLightbox}
-                className="p-2 bg-white text-gray-700 rounded-full hover:bg-gray-100 transition-colors"
+                className="w-11 h-11 bg-white text-gray-700 rounded-full hover:bg-gray-100 transition-colors flex items-center justify-center shadow-md"
               >
                 ✕
               </button>
@@ -359,13 +411,13 @@ function Gallery() {
               <>
                 <button
                   onClick={prevPhoto}
-                  className="absolute left-4 top-1/2 transform -translate-y-1/2 p-3 bg-white text-gray-700 rounded-full hover:bg-gray-100 transition-colors"
+                  className="absolute left-4 top-1/2 transform -translate-y-1/2 w-12 h-12 bg-white text-gray-700 rounded-full hover:bg-gray-100 transition-colors flex items-center justify-center shadow-md"
                 >
                   ←
                 </button>
                 <button
                   onClick={nextPhoto}
-                  className="absolute right-4 top-1/2 transform -translate-y-1/2 p-3 bg-white text-gray-700 rounded-full hover:bg-gray-100 transition-colors"
+                  className="absolute right-4 top-1/2 transform -translate-y-1/2 w-12 h-12 bg-white text-gray-700 rounded-full hover:bg-gray-100 transition-colors flex items-center justify-center shadow-md"
                 >
                   →
                 </button>

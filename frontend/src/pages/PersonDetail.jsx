@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { getPersonById, updatePersonName, deletePerson } from '../services/personService';
+import { getPersonById, updatePersonName, deletePerson, updatePersonPhotos } from '../services/personService';
+import { getPhotos } from '../services/photoService';
 import { deletePhoto } from '../services/photoService';
-import { User, Camera, Edit3, Trash2, ArrowLeft, Loader2, CheckCircle, X, Eye } from 'lucide-react';
+import { User, Camera, Edit3, Trash2, ArrowLeft, Loader2, CheckCircle, X, Eye, ImageIcon } from 'lucide-react';
 
 function PersonDetail() {
   const { id } = useParams();
@@ -29,12 +30,43 @@ function PersonDetail() {
   const [showPhotoDeleteConfirm, setShowPhotoDeleteConfirm] = useState(null);
   const [deletingPhoto, setDeletingPhoto] = useState(false);
   const [selectedPhoto, setSelectedPhoto] = useState(null);
+  const [gridDensity, setGridDensity] = useState('comfortable');
+
+  // Manual album management state
+  const [showManagePhotos, setShowManagePhotos] = useState(false);
+  const [galleryPhotos, setGalleryPhotos] = useState([]);
+  const [selectedAlbumPhotoIds, setSelectedAlbumPhotoIds] = useState(new Set());
+  const [initialAlbumPhotoIds, setInitialAlbumPhotoIds] = useState(new Set());
+  const [manageLoading, setManageLoading] = useState(false);
+  const [manageSaving, setManageSaving] = useState(false);
+  const [manageError, setManageError] = useState(null);
 
   useEffect(() => {
     if (id) {
       loadPersonData();
     }
   }, [id]);
+
+  useEffect(() => {
+    if (!selectedPhoto) {
+      return;
+    }
+
+    const onKeyDown = (event) => {
+      if (event.key === 'Escape') {
+        closeLightbox();
+      }
+      if (event.key === 'ArrowRight') {
+        nextPhoto();
+      }
+      if (event.key === 'ArrowLeft') {
+        prevPhoto();
+      }
+    };
+
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, [selectedPhoto, photos]);
 
   const loadPersonData = async () => {
     try {
@@ -156,6 +188,75 @@ function PersonDetail() {
 
   const handlePhotoClick = (photo) => {
     openLightbox(photo);
+  };
+
+  const openManagePhotosModal = async () => {
+    try {
+      setShowManagePhotos(true);
+      setManageLoading(true);
+      setManageError(null);
+
+      const currentAlbumIds = new Set(photos.map((photo) => photo._id));
+      setSelectedAlbumPhotoIds(new Set(currentAlbumIds));
+      setInitialAlbumPhotoIds(new Set(currentAlbumIds));
+
+      const result = await getPhotos({ page: 1, limit: 500, sort: 'newest' });
+      if (result.success) {
+        setGalleryPhotos(result.photos || []);
+      } else {
+        setManageError(result.error || 'Failed to load gallery photos');
+      }
+    } catch (err) {
+      setManageError('Failed to load gallery photos');
+    } finally {
+      setManageLoading(false);
+    }
+  };
+
+  const toggleAlbumSelection = (photoId) => {
+    setSelectedAlbumPhotoIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(photoId)) {
+        next.delete(photoId);
+      } else {
+        next.add(photoId);
+      }
+      return next;
+    });
+  };
+
+  const saveManagedPhotos = async () => {
+    try {
+      setManageSaving(true);
+      setManageError(null);
+
+      const addPhotoIds = Array.from(selectedAlbumPhotoIds).filter((id) => !initialAlbumPhotoIds.has(id));
+      const removePhotoIds = Array.from(initialAlbumPhotoIds).filter((id) => !selectedAlbumPhotoIds.has(id));
+
+      if (addPhotoIds.length === 0 && removePhotoIds.length === 0) {
+        setShowManagePhotos(false);
+        return;
+      }
+
+      const result = await updatePersonPhotos(id, addPhotoIds, removePhotoIds);
+      if (!result.success) {
+        setManageError(result.error || 'Failed to update album photos');
+        return;
+      }
+
+      await loadPersonData();
+      setShowManagePhotos(false);
+    } catch (err) {
+      setManageError('Failed to update album photos');
+    } finally {
+      setManageSaving(false);
+    }
+  };
+
+  const gridClassNameByDensity = {
+    compact: 'grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-3',
+    comfortable: 'grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4',
+    large: 'grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5',
   };
 
   if (loading) {
@@ -310,6 +411,14 @@ function PersonDetail() {
             {/* Actions */}
             <div className="flex gap-2">
               <button
+                onClick={openManagePhotosModal}
+                className="px-3 py-2 text-blue-600 hover:text-blue-800 hover:bg-blue-50 rounded transition-colors flex items-center gap-2"
+                title="Manage album photos"
+              >
+                <ImageIcon className="h-5 w-5" />
+                Manage Photos
+              </button>
+              <button
                 onClick={() => setShowDeleteConfirm(true)}
                 className="p-2 text-red-600 hover:text-red-800 hover:bg-red-50 rounded transition-colors"
                 title="Delete person"
@@ -322,9 +431,22 @@ function PersonDetail() {
 
         {/* Photos Grid */}
         <div className="bg-white rounded-lg shadow-sm p-6">
-          <h2 className="text-xl font-semibold text-gray-900 mb-6">
-            Photos ({photos.length})
-          </h2>
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+            <h2 className="text-xl font-semibold text-gray-900">
+              Photos ({photos.length})
+            </h2>
+
+            <select
+              value={gridDensity}
+              onChange={(e) => setGridDensity(e.target.value)}
+              className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              aria-label="Grid density"
+            >
+              <option value="compact">Compact Grid</option>
+              <option value="comfortable">Comfortable Grid</option>
+              <option value="large">Large Grid</option>
+            </select>
+          </div>
 
           {photos.length === 0 ? (
             <div className="text-center py-12">
@@ -335,7 +457,7 @@ function PersonDetail() {
               </p>
             </div>
           ) : (
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
+            <div className={gridClassNameByDensity[gridDensity]}>
               {photos.map((photo) => (
                 <button
                   key={photo._id}
@@ -370,18 +492,18 @@ function PersonDetail() {
       {/* Photo Lightbox */}
       {selectedPhoto && (
         <div className="fixed inset-0 bg-black bg-opacity-90 flex items-center justify-center z-50">
-          <div className="w-full h-full p-4 md:p-6 flex items-center justify-center">
+          <div className="w-full h-full px-3 py-3 md:px-6 md:py-6 flex items-center justify-center">
             <img
               src={selectedPhoto.originalUrl}
               alt={selectedPhoto.fileName}
-              className="w-auto h-auto max-w-[calc(100vw-2rem)] md:max-w-[calc(100vw-6rem)] max-h-[calc(100vh-9rem)] object-contain rounded-lg shadow-2xl"
+              className="block h-[88vh] md:h-[90vh] w-auto max-w-[96vw] object-contain rounded-lg shadow-2xl"
             />
 
             {/* Lightbox Controls */}
             <div className="absolute top-4 right-4 flex gap-2">
               <button
                 onClick={closeLightbox}
-                className="p-2 bg-white text-gray-700 rounded-full hover:bg-gray-100 transition-colors"
+                className="w-11 h-11 bg-white text-gray-700 rounded-full hover:bg-gray-100 transition-colors flex items-center justify-center shadow-md"
               >
                 ✕
               </button>
@@ -392,13 +514,13 @@ function PersonDetail() {
               <>
                 <button
                   onClick={prevPhoto}
-                  className="absolute left-4 top-1/2 transform -translate-y-1/2 p-3 bg-white text-gray-700 rounded-full hover:bg-gray-100 transition-colors"
+                  className="absolute left-4 top-1/2 transform -translate-y-1/2 w-12 h-12 bg-white text-gray-700 rounded-full hover:bg-gray-100 transition-colors flex items-center justify-center shadow-md"
                 >
                   ←
                 </button>
                 <button
                   onClick={nextPhoto}
-                  className="absolute right-4 top-1/2 transform -translate-y-1/2 p-3 bg-white text-gray-700 rounded-full hover:bg-gray-100 transition-colors"
+                  className="absolute right-4 top-1/2 transform -translate-y-1/2 w-12 h-12 bg-white text-gray-700 rounded-full hover:bg-gray-100 transition-colors flex items-center justify-center shadow-md"
                 >
                   →
                 </button>
@@ -493,6 +615,98 @@ function PersonDetail() {
                     <Trash2 className="h-4 w-4" />
                     Delete
                   </>
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Manage Photos Modal */}
+      {showManagePhotos && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 max-w-5xl w-full mx-4 max-h-[85vh] overflow-hidden flex flex-col">
+            <div className="flex items-start justify-between mb-4">
+              <div>
+                <h3 className="text-lg font-semibold text-gray-900">Manage Album Photos</h3>
+                <p className="text-sm text-gray-600 mt-1">
+                  Add or remove photos manually if AI grouped them incorrectly.
+                </p>
+              </div>
+              <button
+                onClick={() => setShowManagePhotos(false)}
+                className="p-2 text-gray-500 hover:text-gray-700"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+
+            {manageError && (
+              <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded text-red-700 text-sm">
+                {manageError}
+              </div>
+            )}
+
+            <div className="mb-3 text-sm text-gray-600">
+              Selected for this album: {selectedAlbumPhotoIds.size}
+            </div>
+
+            <div className="flex-1 overflow-y-auto">
+              {manageLoading ? (
+                <div className="h-full flex items-center justify-center text-gray-600">
+                  <Loader2 className="h-5 w-5 animate-spin mr-2" />
+                  Loading photos...
+                </div>
+              ) : (
+                <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-3">
+                  {galleryPhotos.map((photo) => {
+                    const isSelected = selectedAlbumPhotoIds.has(photo._id);
+                    return (
+                      <button
+                        key={photo._id}
+                        type="button"
+                        onClick={() => toggleAlbumSelection(photo._id)}
+                        className={`relative rounded-lg overflow-hidden border-2 transition-all ${
+                          isSelected ? 'border-blue-500 ring-2 ring-blue-200' : 'border-transparent hover:border-gray-300'
+                        }`}
+                      >
+                        <img
+                          src={photo.thumbnailUrls?.medium || photo.originalUrl}
+                          alt={photo.fileName || 'Photo'}
+                          className="w-full aspect-square object-cover"
+                        />
+                        <div className={`absolute top-1 right-1 w-5 h-5 rounded-full text-xs flex items-center justify-center ${
+                          isSelected ? 'bg-blue-600 text-white' : 'bg-white text-gray-500'
+                        }`}>
+                          {isSelected ? '✓' : '+'}
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+
+            <div className="mt-5 flex justify-end gap-3">
+              <button
+                onClick={() => setShowManagePhotos(false)}
+                disabled={manageSaving}
+                className="px-4 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 transition-colors disabled:opacity-50"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={saveManagedPhotos}
+                disabled={manageSaving || manageLoading}
+                className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors disabled:opacity-50 flex items-center gap-2"
+              >
+                {manageSaving ? (
+                  <>
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    Saving...
+                  </>
+                ) : (
+                  'Save Changes'
                 )}
               </button>
             </div>

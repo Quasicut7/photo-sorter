@@ -21,6 +21,10 @@ const personSchema = new mongoose.Schema({
     ref: 'Photo',
     default: null,
   },
+  manualPhotoIds: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Photo',
+  }],
   averageEncoding: {
     type: [Number],
     default: null,
