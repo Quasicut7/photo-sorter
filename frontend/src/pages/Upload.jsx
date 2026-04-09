@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { uploadPhotos } from '../services/photoService';
 import PhotoDropzone from '../components/upload/PhotoDropzone';
-import { CheckCircle, AlertCircle, Loader2 } from 'lucide-react';
+import { CheckCircle, AlertCircle, Loader2, ArrowLeft } from 'lucide-react';
 
 function Upload() {
   const [selectedFiles, setSelectedFiles] = useState([]);
@@ -83,6 +83,13 @@ function Upload() {
       <div className="max-w-4xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="mb-8">
+          <button
+            onClick={() => navigate('/')}
+            className="flex items-center gap-2 text-blue-600 hover:text-blue-800 mb-4"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            Back to Dashboard
+          </button>
           <h1 className="text-3xl font-bold text-gray-900">Upload Photos</h1>
           <p className="mt-2 text-gray-600">
             Select photos to organize with AI-powered face detection
@@ -182,16 +189,6 @@ function Upload() {
               <li>• Photos will be automatically processed for face detection</li>
             </ul>
           </div>
-        </div>
-
-        {/* Navigation */}
-        <div className="mt-6 text-center">
-          <button
-            onClick={() => navigate('/')}
-            className="text-blue-600 hover:text-blue-800 font-medium"
-          >
-            ← Back to Dashboard
-          </button>
         </div>
       </div>
     </div>

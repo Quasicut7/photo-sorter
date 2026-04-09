@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getPersons, getPersonStats } from '../services/personService';
 import { useDebounce } from '../hooks/useOptimization';
-import { Users, User, Eye, BarChart3, Loader2, Search } from 'lucide-react';
+import { Users, User, Eye, BarChart3, Loader2, Search, ArrowLeft } from 'lucide-react';
 
 function Albums() {
   const navigate = useNavigate();
@@ -106,6 +106,13 @@ function Albums() {
     <div className="min-h-screen bg-gray-50">
       <div className="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
         <div className="mb-8">
+          <button
+            onClick={() => navigate('/')}
+            className="flex items-center gap-2 text-blue-600 hover:text-blue-800 mb-4"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            Back to Dashboard
+          </button>
           <h1 className="text-3xl font-bold text-gray-900 flex items-center gap-3">
             <Users className="h-8 w-8 text-blue-600" />
             Photo Albums

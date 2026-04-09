@@ -337,16 +337,18 @@ function PersonDetail() {
           ) : (
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
               {photos.map((photo) => (
-                <div
+                <button
                   key={photo._id}
-                  className="relative group"
+                  type="button"
+                  onClick={() => handlePhotoClick(photo)}
+                  className="relative group text-left"
                 >
                   <img
                     src={photo.thumbnailUrls?.medium || photo.originalUrl}
                     alt={`Photo ${photo._id}`}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform"
+                    className="w-full h-full object-cover rounded-lg group-hover:scale-105 transition-transform cursor-zoom-in"
                   />
-                </div>
+                </button>
               ))}
             </div>
           )}
@@ -368,11 +370,11 @@ function PersonDetail() {
       {/* Photo Lightbox */}
       {selectedPhoto && (
         <div className="fixed inset-0 bg-black bg-opacity-90 flex items-center justify-center z-50">
-          <div className="max-w-5xl max-h-full p-4">
+          <div className="w-full h-full p-4 md:p-6 flex items-center justify-center">
             <img
               src={selectedPhoto.originalUrl}
               alt={selectedPhoto.fileName}
-              className="max-w-full max-h-full object-contain rounded-lg"
+              className="w-auto h-auto max-w-[calc(100vw-2rem)] md:max-w-[calc(100vw-6rem)] max-h-[calc(100vh-9rem)] object-contain rounded-lg shadow-2xl"
             />
 
             {/* Lightbox Controls */}

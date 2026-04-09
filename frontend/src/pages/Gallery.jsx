@@ -4,7 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import { getPhotos, deletePhoto } from '../services/photoService';
 import { useDebounce } from '../hooks/useOptimization';
 import OptimizedImageGrid from '../components/common/OptimizedImageGrid';
-import { ImageIcon, Trash2, Eye, User, Calendar, Search, Filter, Loader2, AlertCircle } from 'lucide-react';
+import { ImageIcon, Trash2, Eye, User, Calendar, Search, Filter, Loader2, AlertCircle, ArrowLeft } from 'lucide-react';
 
 function Gallery() {
   const [photos, setPhotos] = useState([]);
@@ -141,6 +141,13 @@ function Gallery() {
       <div className="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="mb-8">
+          <button
+            onClick={() => navigate('/')}
+            className="flex items-center gap-2 text-blue-600 hover:text-blue-800 mb-4"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            Back to Dashboard
+          </button>
           <h1 className="text-3xl font-bold text-gray-900 flex items-center gap-3">
             <ImageIcon className="h-8 w-8 text-blue-600" />
             Photo Gallery
@@ -325,25 +332,16 @@ function Gallery() {
           </div>
         )}
 
-        {/* Navigation */}
-        <div className="mt-6 text-center">
-          <button
-            onClick={() => navigate('/')}
-            className="text-blue-600 hover:text-blue-800 font-medium"
-          >
-            ← Back to Dashboard
-          </button>
-        </div>
       </div>
 
       {/* Photo Lightbox */}
       {selectedPhoto && (
         <div className="fixed inset-0 bg-black bg-opacity-90 flex items-center justify-center z-50">
-          <div className="max-w-5xl max-h-full p-4">
+          <div className="w-full h-full p-4 md:p-6 flex items-center justify-center">
             <img
               src={selectedPhoto.originalUrl}
               alt={selectedPhoto.fileName}
-              className="max-w-full max-h-full object-contain rounded-lg"
+              className="w-auto h-auto max-w-[calc(100vw-2rem)] md:max-w-[calc(100vw-6rem)] max-h-[calc(100vh-9rem)] object-contain rounded-lg shadow-2xl"
             />
 
             {/* Lightbox Controls */}
