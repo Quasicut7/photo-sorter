@@ -7,6 +7,18 @@ const aiService = require('../services/aiService');
 
 class PhotoController {
 
+  constructor() {
+    // Preserve instance context when methods are passed directly to Express routes.
+    this.uploadPhotos = this.uploadPhotos.bind(this);
+    this.getPhotos = this.getPhotos.bind(this);
+    this.getPhotoById = this.getPhotoById.bind(this);
+    this.deletePhoto = this.deletePhoto.bind(this);
+    this.triggerProcessing = this.triggerProcessing.bind(this);
+    this.processPhotoAI = this.processPhotoAI.bind(this);
+    this.processFaceClusters = this.processFaceClusters.bind(this);
+    this.updatePersonCluster = this.updatePersonCluster.bind(this);
+  }
+
   /**
    * Upload photos
    * POST /api/photos/upload
@@ -331,26 +343,34 @@ class PhotoController {
     try {
       console.log(`Processing ${faces.length} face clusters for photo ${photoId}`);
 
-      // Get existing persons for this user to cluster against
+      // Build a stable list where centroid indices always match person IDs.
       const existingPersons = await Person.find({ userId }).lean();
-      const existingEncodings = existingPersons.map(person => person.averageEncoding).filter(enc => enc);
+      const candidateClusters = existingPersons
+        .filter((person) => Array.isArray(person.averageEncoding) && person.averageEncoding.length === 128)
+        .map((person) => ({
+          personId: person._id,
+          centroid: person.averageEncoding,
+        }));
 
       // For each detected face, find or create person cluster
       for (const face of faces) {
         let assignedPersonId = null;
 
-        if (existingEncodings.length > 0) {
+        if (candidateClusters.length > 0) {
           // Try to assign face to existing person using AI clustering
           const clusterResult = await aiService.assignFaceToCluster(
             face.encoding,
-            existingEncodings,
+            candidateClusters.map((cluster) => cluster.centroid),
             0.6 // tolerance
           );
 
           if (clusterResult.success && clusterResult.assignedCluster >= 0) {
-            // Assign to existing person
-            assignedPersonId = existingPersons[clusterResult.assignedCluster]._id;
-            console.log(`Assigned face to existing person: ${assignedPersonId}`);
+            // Assign to existing person, guarded by bounds to avoid bad indices.
+            const matched = candidateClusters[clusterResult.assignedCluster];
+            if (matched) {
+              assignedPersonId = matched.personId;
+              console.log(`Assigned face to existing person: ${assignedPersonId}`);
+            }
           }
         }
 
@@ -363,10 +383,26 @@ class PhotoController {
             photoCount: 1
           });
           assignedPersonId = newPerson._id;
+          candidateClusters.push({
+            personId: newPerson._id,
+            centroid: face.encoding,
+          });
           console.log(`Created new person cluster: ${assignedPersonId}`);
         } else {
           // Update existing person
           await this.updatePersonCluster(assignedPersonId, face.encoding, photoId);
+
+          // Keep in-memory centroids fresh for remaining faces in this photo.
+          const matchedIndex = candidateClusters.findIndex(
+            (cluster) => cluster.personId.toString() === assignedPersonId.toString()
+          );
+          if (matchedIndex >= 0) {
+            const current = candidateClusters[matchedIndex].centroid;
+            const alpha = 0.1;
+            candidateClusters[matchedIndex].centroid = current.map((avg, i) =>
+              avg * (1 - alpha) + face.encoding[i] * alpha
+            );
+          }
         }
 
         // Save face cluster data

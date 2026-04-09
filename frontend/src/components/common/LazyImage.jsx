@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useIntersectionObserver } from '../hooks/useOptimization';
+import { useIntersectionObserver } from '../../hooks/useOptimization';
 
 function LazyImage({
   src,

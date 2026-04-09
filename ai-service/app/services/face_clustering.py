@@ -138,28 +138,42 @@ class FaceClusteringService:
                 return {
                     "success": True,
                     "assigned_cluster": -1,
-                    "distance": float('inf'),
+                    "distance": None,
+                    "tolerance_met": False,
                     "message": "No clusters available"
                 }
 
             face_array = np.array(face_encoding)
             best_cluster = -1
             best_distance = float('inf')
+            valid_centroids = 0
 
             # Find the closest cluster centroid
             for i, centroid in enumerate(cluster_centroids):
                 if not isinstance(centroid, list) or len(centroid) != 128:
                     continue
 
+                valid_centroids += 1
+
                 centroid_array = np.array(centroid)
                 distance = np.linalg.norm(face_array - centroid_array)
 
                 if distance < best_distance:
-                    best_distance = distance
+                    best_distance = float(distance)
                     best_cluster = i
 
+            if valid_centroids == 0:
+                return {
+                    "success": True,
+                    "assigned_cluster": -1,
+                    "distance": None,
+                    "tolerance_met": False,
+                    "message": "No valid clusters available"
+                }
+
             # Check if the best distance is within tolerance
-            if best_distance <= tolerance:
+            tolerance_met = bool(best_distance <= tolerance)
+            if tolerance_met:
                 assigned_cluster = best_cluster
                 message = f"Assigned to cluster {best_cluster}"
             else:
@@ -170,7 +184,7 @@ class FaceClusteringService:
                 "success": True,
                 "assigned_cluster": assigned_cluster,
                 "distance": float(best_distance),
-                "tolerance_met": best_distance <= tolerance,
+                "tolerance_met": tolerance_met,
                 "message": message
             }
 
